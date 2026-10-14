@@ -39,7 +39,6 @@ jobs:
 
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
           EOF
 
           cat > app/build.gradle.kts <<'EOF'
@@ -155,8 +154,8 @@ jobs:
               private WebView web;
 
               @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
+              protected void onCreate(Bundle b) {
+                  super.onCreate(b);
                   web = new WebView(this);
                   web.setBackgroundColor(0xFF0F0C29);
                   web.setVerticalScrollBarEnabled(false);
@@ -171,58 +170,11 @@ jobs:
                   web.loadUrl("file:///android_asset/index.html");
               }
 
-              @Override
-              public void onBackPressed() {
-                  if (web != null && web.canGoBack()) web.goBack();
-                  else super.onBackPressed();
-              }
-
               private class Bridge {
                   @JavascriptInterface
-                  public void copy(String text) {
+                  public void copy(String t) {
                       runOnUiThread(() -> {
                           ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                          cm.setPrimaryClip(ClipData.newPlainText("lysy", text));
+                          cm.setPrimaryClip(ClipData.newPlainText("lysy", t));
                       });
                   }
-
-                  @JavascriptInterface
-                  public void share(String text) {
-                      runOnUiThread(() -> {
-                          Intent i = new Intent(Intent.ACTION_SEND);
-                          i.setType("text/plain");
-                          i.putExtra(Intent.EXTRA_TEXT, text);
-                          startActivity(Intent.createChooser(i, "Поделиться"));
-                      });
-                  }
-
-                  @JavascriptInterface
-                  public void vibrate() {
-                      runOnUiThread(() -> web.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP));
-                  }
-              }
-          }
-          EOF
-
-          cat > app/src/main/assets/index.html <<'EOF'
-          <!DOCTYPE html>
-          <html lang="ru">
-          <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-          <title>Лысый переводчик</title>
-          <style>
-          *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-          body{font-family:system-ui,Roboto,sans-serif;background:#0F0C29;color:#fff;overflow-x:hidden;padding:24px 16px 40px;min-height:100vh}
-          .blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.55;z-index:-1;animation:fl 14s ease-in-out infinite alternate}
-          .b1{width:320px;height:320px;background:#7F5AF0;top:-80px;left:-100px}
-          .b2{width:280px;height:280px;background:#FF4D9D;bottom:-60px;right:-90px;animation-delay:-5s}
-          .b3{width:220px;height:220px;background:#FFB86B;top:45%;left:55%;animation-delay:-9s;opacity:.35}
-          @keyframes fl{to{transform:translate(40px,60px) scale(1.2)}}
-          header{text-align:center;margin-bottom:22px}
-          .head{font-size:64px;display:inline-block;animation:bo 2.4s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(255,77,157,.5))}
-          @keyframes bo{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-12px) rotate(6deg)}}
-          h1{font-size:30px;font-weight:900;margin-top:6px;background:linear-gradient(90deg,#B8A4FF,#FF7EB6,#FFD29D,#B8A4FF);background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 6s linear infinite}
-          @keyframes sh{to{background-position:300%}}
-          .sub{opacity:.65;font-size:15px;margin-top:4px}
-          .mode{display:fl
